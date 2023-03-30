@@ -1,0 +1,26 @@
+{
+  "name": "AZWorlds-backend",
+  "version": "1.0.0",
+  "description": "Edit me later",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0x73696d616f/AZWorlds-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/0x73696d616f/AZWorlds-backend/issues"
+  },
+  "homepage": "https://github.com/0x73696d616f/AZWorlds-backend#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.13.0",
+    "dotenv": "^16.0.3",
+    "ethers": "^6.2.3",
+    "node-fetch": "^2.6.7"
+  }
+}
