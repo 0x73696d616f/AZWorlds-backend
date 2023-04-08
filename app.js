@@ -9,9 +9,9 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const supabaseUrl = 'https://wylvkxjtrqxesqarblyf.supabase.co';
 const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
-const characterSaleAddress = "0x65aAc97b628AdA288b8302510A01D703968c4F6E";
-const itemAddress = "0x7f4fbef63efc155816522395629cdbb155e4e212";
-const goldAddress = "0x4Faf565e395a1C069a8132437D3b70BeF1A0d999";
+const goldAddress = "0x036911EB6AE367Bb24a31a469adC04DF00a4Bf5c";
+const characterSaleAddress = "0xf723ebd174637a120098AAaaB91B93Bc7c7BfA6f";
+const itemAddress = "0x35CD4eECcAe94949932CdFD33077dd415dA6949f";
 
 async function bootstrapDatabase(rpcUrl, chain, chainName) {
     const provider = new JsonRpcProvider(rpcUrl);
@@ -123,6 +123,7 @@ async function onContractEvents(rpcUrl, chain, chainName) {
     let contract = new ethers.Contract(characterSaleAddress, characterSaleABI, provider);
 
     contract.on("CharacterBought", async (buyer, charId, price, tokenURI) => {
+        console.log("Character Bought " + "buyer " + buyer + " charId " + charId + " price " + price + " tokenURI " + tokenURI);
         try {
             createCharacter(buyer, charId, price, tokenURI, chainName);
         } catch (error) {
@@ -131,6 +132,7 @@ async function onContractEvents(rpcUrl, chain, chainName) {
     });
 
     contract.on("ItemsEquipped", async (charId, itemIds) => {
+        console.log("Items Equipped " + "charId " + charId + " itemIds " + itemIds);
         try {
             updateItemsEquipped(charId, itemIds);
         } catch (error) {
@@ -138,6 +140,7 @@ async function onContractEvents(rpcUrl, chain, chainName) {
         }
     });
     contract.on("GoldCarried", async (charId, amount) => {
+        console.log("Gold Carried " + "charId " + charId + " amount " + amount);
         try {
             updateGoldCarried(charId, amount);
         } catch (error) {
@@ -145,6 +148,7 @@ async function onContractEvents(rpcUrl, chain, chainName) {
         }
     });
     contract.on("GoldDropped", async (charId, amount) => { 
+        console.log("Gold Dropped " + "charId " + charId + " amount " + amount);
         try {
             updateGoldCarried(charId, -amount);
         } catch (error) {
@@ -154,6 +158,7 @@ async function onContractEvents(rpcUrl, chain, chainName) {
 
     contract.on("Transfer", async (from, to, charId) => {
         if (from == to) return;
+        console.log("Character Transfer " + "from " + from + " to " + to + " charId " + charId);
         try {
             updateCharId(chain, from, to, charId, chainName);
         } catch (error) {
@@ -162,6 +167,7 @@ async function onContractEvents(rpcUrl, chain, chainName) {
     });
 
     contract.on("CharacterLevelUp", async (charId, level) => {
+        console.log("Character Level Up " + "charId " + charId + " level " + level)
         try {
             updateLevelAndPower(charId, level);
         } catch (error) {
@@ -173,6 +179,7 @@ async function onContractEvents(rpcUrl, chain, chainName) {
 
     contract.on("TransferSingle", async (operator, from, to, id, amount) => {
         if (from == to) return;
+        console.log("Item Transfer " + "from " + from + " to " + to + " id " + id + " amount " + amount);
         try {
             updateItemId(chain, from, to, id, amount);
         } catch (error) {
@@ -182,6 +189,7 @@ async function onContractEvents(rpcUrl, chain, chainName) {
 
     contract.on("TransferBatch", async (operator, from, to, ids, amounts) => {
         if (from == to) return;
+        console.log("Item Transfer " + "from " + from + " to " + to + " ids " + ids + " amounts " + amounts);
         try {
             for (let i = 0; i < ids.length; i++) {
                 updateItemId(chain, from, to, ids[i], amounts[i]);
@@ -195,6 +203,7 @@ async function onContractEvents(rpcUrl, chain, chainName) {
 
     contract.on("Transfer", async (from, to, amount) => {
         if (from == to) return;
+        console.log("Gold Transfer " + "from " + from + " to " + to + " amount " + amount);
         try {
             updateGold(chain, from, to, amount);
         } catch (error) {
@@ -234,7 +243,7 @@ async function updateGoldCarried(charId, amount) {
         .select('equippedGold')
         .eq('charId', charId.toString())
 
-    data[0].equippedGold = (BigInt(amount) + BigInt(data[0].equippedGold)).toString();
+    data[0].equippedGold = (BigInt(amount) + BigInt(data[0].equippedGold || 0)).toString();
     ({ data, error } = await supabase
         .from('Character')
         .update({equippedGold : data[0].equippedGold})
@@ -276,26 +285,28 @@ async function updateLevelAndPower(charId, level) {
 
 async function updateCharId(chain, from, to, id, chainName) {
     const updateCharIdsArray = (address, isAdding, addressData) => {
-        if (addressData.length === 0) {
+        if (Object.keys(addressData).length === 0 || !Array.isArray(addressData.charIds)) {
             addressData = {address: address, charIds: [id.toString()]};
-            return;
+            return addressData;
         } 
         if(isAdding) {
             addressData.charIds.push(id.toString());
-            return;
+            return addressData;
         };
+
         let index = addressData.charIds.indexOf(id.toString());
         if (index !== -1) {
             addressData.charIds.splice(index, 1);
         } else {
             addressData.charIds.push(id.toString()); // 0 address keeps track of minted ids
         }
+        return addressData;
     }
 
     let [fromData, toData] = await fetchFromToData(chain, from, to, "charIds");
 
-    updateCharIdsArray(from.toString(), false, fromData);
-    updateCharIdsArray(to.toString(), true, toData);
+    fromData = updateCharIdsArray(from.toString(), false, fromData);
+    toData = updateCharIdsArray(to.toString(), true, toData);
 
     ({ data, error } = await supabase
         .from(chain)
@@ -314,20 +325,22 @@ async function updateCharId(chain, from, to, id, chainName) {
 async function updateItemId(chain, from, to, id, amount) {
     const updateItemIdsObject = (address, addressAmount, addressData) => {
         let itemIds = {};
-        if (addressData.length === 0) {
+        if (Object.keys(addressData).length === 0) {
             itemIds[id] = addressAmount.toString();
             addressData = {address: address, itemIds: itemIds};
         } else {
             itemIds = JSON.parse(addressData.itemIds);
             itemIds[id] = itemIds[id] ? (addressAmount + BigInt(itemIds[id])).toString() : addressAmount.toString();
+            if (itemIds[id] === "0") delete itemIds[id];
             addressData.itemIds=JSON.stringify(itemIds);
         } 
+        return addressData;
     }
     id = id.toString();
     let [fromData, toData] = await fetchFromToData(chain, from, to, "itemIds");
 
-    updateItemIdsObject(from.toString(), -BigInt(amount), fromData);
-    updateItemIdsObject(to.toString(), BigInt(amount), toData);
+    fromData = updateItemIdsObject(from.toString(), -BigInt(amount), fromData);
+    toData = updateItemIdsObject(to.toString(), BigInt(amount), toData);
 
     ({ data, error } = await supabase
         .from(chain)
@@ -337,17 +350,18 @@ async function updateItemId(chain, from, to, id, amount) {
 
 async function updateGold(chain, from, to, amount) {
     const updateGoldData = function(address, addressAmount, addressData) {        
-        if (addressData.length === 0) {
+        if (Object.keys(addressData).length === 0) {
             addressData = {address: address, gold: addressAmount.toString()};
         } else {
-            addressData.gold = (BigInt(addressData.gold) + addressAmount).toString();
+            addressData.gold = (BigInt(addressData.gold || 0) + addressAmount).toString();
         } 
+        return addressData;
     }
 
     let [fromData, toData] = await fetchFromToData(chain, from, to, "gold");
 
-    updateGoldData(from.toString(), -BigInt(amount), fromData);
-    updateGoldData(to.toString(), BigInt(amount), toData);
+    fromData = updateGoldData(from.toString(), -BigInt(amount || 0), fromData);
+    toData = updateGoldData(to.toString(), BigInt(amount || 0), toData);
 
     ({data, error} = await supabase
         .from(chain)
