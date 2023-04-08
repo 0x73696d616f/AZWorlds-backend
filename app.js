@@ -427,9 +427,6 @@ const bootstrapDatabases = async () => {
     await createCharacterDatabase(characterTableData);
 }
 
-console.log(process.env.RPC_URL_SEPOLIA);
-console.log(process.env.RPC_URL_MUMBAI);
-console.log(process.env.RPC_URL_FUJI);
 bootstrapDatabases();
 onContractEvents(process.env.RPC_URL_SEPOLIA, "UserInfoChain1", "Sepolia");
 onContractEvents(process.env.RPC_URL_MUMBAI, "UserInfoChain2", "Mumbai");
