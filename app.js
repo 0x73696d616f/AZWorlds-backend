@@ -118,7 +118,7 @@ async function bootstrapDatabase(rpcUrl, chain, chainName) {
     console.log("Database " + chain + " bootstrapped");
 }
 
-async function onContractEvents(rpcUrl, chain, chainName) {
+async function onContractEvents(rpcUrl, chain, chainName, isFuji) {
     const provider = new JsonRpcProvider(rpcUrl);
     let contract = new ethers.Contract(characterSaleAddress, characterSaleABI, provider);
 
@@ -415,7 +415,7 @@ const bootstrapDatabases = async () => {
     
     await bootstrapDatabase(process.env.RPC_URL_SEPOLIA, "UserInfoChain1", "Sepolia");
     await bootstrapDatabase(process.env.RPC_URL_MUMBAI, "UserInfoChain2", "Mumbai");
-    await bootstrapDatabase(process.env.RPC_URL_FUJI, "UserInfoChain3", "Fuji");
+    //await bootstrapDatabase(process.env.RPC_URL_FUJI, "UserInfoChain3", "Fuji", true);
 
     let characterTableData = [];
     for (let [charId, row] of Object.entries(characterData)) {
@@ -427,7 +427,10 @@ const bootstrapDatabases = async () => {
     await createCharacterDatabase(characterTableData);
 }
 
+console.log(process.env.RPC_URL_SEPOLIA);
+console.log(process.env.RPC_URL_MUMBAI);
+console.log(process.env.RPC_URL_FUJI);
 bootstrapDatabases();
 onContractEvents(process.env.RPC_URL_SEPOLIA, "UserInfoChain1", "Sepolia");
 onContractEvents(process.env.RPC_URL_MUMBAI, "UserInfoChain2", "Mumbai");
-onContractEvents(process.env.RPC_URL_FUJI, "UserInfoChain3", "Fuji");
+//onContractEvents(process.env.RPC_URL_FUJI, "UserInfoChain3", "Fuji", true);
