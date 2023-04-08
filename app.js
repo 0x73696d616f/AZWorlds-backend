@@ -9,9 +9,9 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const supabaseUrl = 'https://wylvkxjtrqxesqarblyf.supabase.co';
 const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
-const goldAddress = "0x036911EB6AE367Bb24a31a469adC04DF00a4Bf5c";
-const characterSaleAddress = "0xf723ebd174637a120098AAaaB91B93Bc7c7BfA6f";
-const itemAddress = "0x35CD4eECcAe94949932CdFD33077dd415dA6949f";
+const goldAddress = "0x001365b749Fc83677257128011bC1F7A4Bda55C2";
+const characterSaleAddress = "0x21b05f95C311683E2F7775e907DC252C0331cC68";
+const itemAddress = "0xD72D536981a5a0196B45Fe9BAc16D5f68E138B64";
 
 async function bootstrapDatabase(rpcUrl, chain, chainName) {
     const provider = new JsonRpcProvider(rpcUrl);
@@ -414,6 +414,8 @@ const bootstrapDatabases = async () => {
     await deleteCharacterDatabase();
     
     await bootstrapDatabase(process.env.RPC_URL_SEPOLIA, "UserInfoChain1", "Sepolia");
+    await bootstrapDatabase(process.env.RPC_URL_MUMBAI, "UserInfoChain2", "Mumbai");
+    await bootstrapDatabase(process.env.RPC_URL_FUJI, "UserInfoChain3", "Fuji");
 
     let characterTableData = [];
     for (let [charId, row] of Object.entries(characterData)) {
@@ -427,3 +429,5 @@ const bootstrapDatabases = async () => {
 
 bootstrapDatabases();
 onContractEvents(process.env.RPC_URL_SEPOLIA, "UserInfoChain1", "Sepolia");
+onContractEvents(process.env.RPC_URL_MUMBAI, "UserInfoChain2", "Mumbai");
+onContractEvents(process.env.RPC_URL_FUJI, "UserInfoChain3", "Fuji");
