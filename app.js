@@ -6,9 +6,9 @@ require("dotenv").config();
 const { createClient } = require('@supabase/supabase-js')
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-const supabaseUrl = 'https://wylvkxjtrqxesqarblyf.supabase.co'
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabaseUrl = 'https://wylvkxjtrqxesqarblyf.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 const characterSaleAddress = "0x65aAc97b628AdA288b8302510A01D703968c4F6E";
 const itemAddress = "0x7f4fbef63efc155816522395629cdbb155e4e212";
 const goldAddress = "0x4Faf565e395a1C069a8132437D3b70BeF1A0d999";
