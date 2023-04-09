@@ -9,9 +9,9 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const supabaseUrl = 'https://wylvkxjtrqxesqarblyf.supabase.co';
 const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
-const goldAddress = "0x001365b749Fc83677257128011bC1F7A4Bda55C2";
-const characterSaleAddress = "0x21b05f95C311683E2F7775e907DC252C0331cC68";
-const itemAddress = "0xD72D536981a5a0196B45Fe9BAc16D5f68E138B64";
+const goldAddress = "0xC1C8f875922b96d0c9905d95f9Ec7C78772AC625";
+const characterSaleAddress = "0xc71B82aA216D130391a70C506ceC4919374997ab";
+const itemAddress = "0xF6b4408E368b2b5d837d7D07857515F504376E14";
 
 async function bootstrapDatabase(rpcUrl, chain, chainName) {
     const provider = new JsonRpcProvider(rpcUrl);
