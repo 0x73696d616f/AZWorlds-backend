@@ -430,4 +430,5 @@ const bootstrapDatabases = async () => {
 bootstrapDatabases();
 onContractEvents(process.env.RPC_URL_SEPOLIA, "UserInfoChain1", "Sepolia");
 onContractEvents(process.env.RPC_URL_MUMBAI, "UserInfoChain2", "Mumbai");
+// fuji does not support eth_newFilter
 //onContractEvents(process.env.RPC_URL_FUJI, "UserInfoChain3", "Fuji", true);
